@@ -1,0 +1,27 @@
+/*
+    // Install PacketSink on the server to receive uploads from clients
+    uint16_t uploadPort = 60000;
+    PacketSinkHelper serverPacketSinkHelper ("ns3::TcpSocketFactory",
+                                             InetSocketAddress (Ipv4Address::GetAny (), uploadPort));
+
+    ApplicationContainer serverSinkApp = serverPacketSinkHelper.Install (serverNode.Get (0));
+    serverSinkApp.Start (Seconds (0.0));
+    serverSinkApp.Stop (Seconds (20.0));
+
+    // Install OnOffApplication on each client to upload data to the server
+    for (uint32_t i = 0; i < wifiClients.GetN (); ++i)
+    {
+        OnOffHelper clientOnOff ("ns3::TcpSocketFactory",
+                                 InetSocketAddress (p2pInterfaces.GetAddress (1), uploadPort));
+
+        // Set the data rate between 100 Kbps and 200 Kbps
+        std::ostringstream rate;
+        rate << (100 + (i % 101)) << "Kbps"; // 100 Kbps to 200 Kbps
+        clientOnOff.SetAttribute ("DataRate", StringValue (rate.str ()));
+        clientOnOff.SetAttribute ("PacketSize", UintegerValue (1024)); // 1KB packets
+
+        ApplicationContainer clientUploadApp = clientOnOff.Install (wifiClients.Get (i));
+        clientUploadApp.Start (Seconds (1.0));
+        clientUploadApp.Stop (Seconds (20.0));
+    }
+    */

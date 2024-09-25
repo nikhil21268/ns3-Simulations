@@ -1,3 +1,4 @@
+#include "ns3/command-line.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/mobility-module.h"
@@ -52,7 +53,14 @@ int main (int argc, char *argv[])
 {
     Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("0"));
 
+    Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue ("HtMcs0"));
+
     uint32_t numClients = 5; // Specify the number of WiFi clients
+
+     CommandLine cmd;
+    cmd.AddValue ("numClients", "Number of WiFi clients", numClients);
+    cmd.Parse (argc, argv);
+
 
     NodeContainer wifiClients;
     wifiClients.Create (numClients);
@@ -105,10 +113,10 @@ int main (int argc, char *argv[])
     Ptr<UniformRandomVariable> yPos = CreateObject<UniformRandomVariable> ();
 
     // Define the area in which clients are randomly placed
-    xPos->SetAttribute ("Min", DoubleValue (-30.0));
-    xPos->SetAttribute ("Max", DoubleValue (30.0));
-    yPos->SetAttribute ("Min", DoubleValue (-30.0));
-    yPos->SetAttribute ("Max", DoubleValue (30.0));
+    xPos->SetAttribute ("Min", DoubleValue (-20.0));
+    xPos->SetAttribute ("Max", DoubleValue (20.0));
+    yPos->SetAttribute ("Min", DoubleValue (-20.0));
+    yPos->SetAttribute ("Max", DoubleValue (20.0));
 
     Ptr<ListPositionAllocator> positionAllocClients = CreateObject<ListPositionAllocator> ();
 
@@ -160,10 +168,18 @@ int main (int argc, char *argv[])
     mobilityAp.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
     mobilityAp.Install (wifiApNode);
 
+     // (Optional) Setup mobility for the server node
+    MobilityHelper mobilityServer;
+    Ptr<ListPositionAllocator> positionAllocServer = CreateObject<ListPositionAllocator> ();
+    positionAllocServer->Add (Vector (0.0, -20.0, 0.0)); // Position it below the AP
+    mobilityServer.SetPositionAllocator (positionAllocServer);
+    mobilityServer.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    mobilityServer.Install (serverNode);
+
     // // (Optional) Setup mobility for the server node
     // MobilityHelper mobilityServer;
     // Ptr<ListPositionAllocator> positionAllocServer = CreateObject<ListPositionAllocator> ();
-    // positionAllocServer->Add (Vector (0.0, -30.0, 0.0)); // Position it below the AP
+    // positionAllocServer->Add (Vector (0.0, -20.0, 0.0)); // Position it below the AP
     // mobilityServer.SetPositionAllocator (positionAllocServer);
     // mobilityServer.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
     // mobilityServer.Install (serverNode);
@@ -181,7 +197,9 @@ int main (int argc, char *argv[])
     // Set up the channel with path loss and fading model
     YansWifiChannelHelper channel = YansWifiChannelHelper();
     channel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
-    channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel");
+    // channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel");
+    channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel",
+                           "Exponent", DoubleValue(4.0));
     // channel.AddPropagationLoss("ns3::NakagamiPropagationLossModel");
     channel.AddPropagationLoss("ns3::NakagamiPropagationLossModel",
                            "m0", DoubleValue(0.5),
@@ -195,8 +213,8 @@ int main (int argc, char *argv[])
 
     // For both part d and part e
 
-    // phy.Set ("TxPowerStart", DoubleValue (30.0)); // Max transmit power
-    // phy.Set ("TxPowerEnd", DoubleValue (30.0));
+    // phy.Set ("TxPowerStart", DoubleValue (20.0)); // Max transmit power
+    // phy.Set ("TxPowerEnd", DoubleValue (20.0));
     // phy.Set ("RxSensitivity", DoubleValue (-90.0)); // Increase sensing range
 
 
@@ -255,7 +273,7 @@ int main (int argc, char *argv[])
         ApplicationContainer app = packetSinkHelper.Install (wifiClients.Get (i));
 
         app.Start (Seconds (0.0));
-        app.Stop (Seconds (30.0));
+        app.Stop (Seconds (20.0));
 
         clientApps.Add (app);
 
@@ -285,7 +303,7 @@ int main (int argc, char *argv[])
         ApplicationContainer app = bulkSend.Install (serverNode.Get (0));
 
         app.Start (Seconds (1.0));
-        app.Stop (Seconds (30.0));
+        app.Stop (Seconds (20.0));
 
         serverApps.Add (app);
     }
@@ -299,7 +317,7 @@ int main (int argc, char *argv[])
 
     ApplicationContainer serverSinkApp = serverPacketSinkHelper.Install (serverNode.Get (0));
     serverSinkApp.Start (Seconds (0.0));
-    serverSinkApp.Stop (Seconds (30.0));
+    serverSinkApp.Stop (Seconds (20.0));
 
     // Install OnOffApplication on each client to upload data to the server
     for (uint32_t i = 0; i < wifiClients.GetN (); ++i)
@@ -311,14 +329,14 @@ int main (int argc, char *argv[])
         std::ostringstream rate;
         rate << (200 + (0 % 101)) << "Kbps"; // 100 Kbps to 200 Kbps
         clientOnOff.SetAttribute ("DataRate", StringValue (rate.str ()));
-        clientOnOff.SetAttribute ("PacketSize", UintegerValue (100)); // 1KB packets
-        clientOnOff.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1000]")); // Long on time
-        clientOnOff.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));    // Zero off time
+        clientOnOff.SetAttribute ("PacketSize", UintegerValue (10)); // 1KB packets
+        // clientOnOff.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1000]")); // Long on time
+        // clientOnOff.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));    // Zero off time
 
 
         ApplicationContainer clientUploadApp = clientOnOff.Install (wifiClients.Get (i));
         clientUploadApp.Start (Seconds (0.0));
-        clientUploadApp.Stop (Seconds (30.0));
+        clientUploadApp.Stop (Seconds (20.0));
     }
 
     // Start checking for completion
@@ -327,7 +345,7 @@ int main (int argc, char *argv[])
     // Enable routing
     Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-    Simulator::Stop (Seconds (30.0));
+    Simulator::Stop (Seconds (20.0));
     Simulator::Run ();
     Simulator::Destroy ();
     return 0;

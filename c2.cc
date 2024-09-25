@@ -1,3 +1,4 @@
+#include "ns3/command-line.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/mobility-module.h"
@@ -50,6 +51,11 @@ void CheckCompletion ()
 int main (int argc, char *argv[])
 {
     uint32_t numClients = 5; // Specify the number of WiFi clients
+
+    CommandLine cmd;
+    cmd.AddValue ("numClients", "Number of WiFi clients", numClients);
+    cmd.Parse (argc, argv);
+
 
     NodeContainer wifiClients;
     wifiClients.Create (numClients);
@@ -126,6 +132,14 @@ int main (int argc, char *argv[])
     mobilityAp.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
     mobilityAp.Install (wifiApNode);
 
+    // (Optional) Setup mobility for the server node
+    MobilityHelper mobilityServer;
+    Ptr<ListPositionAllocator> positionAllocServer = CreateObject<ListPositionAllocator> ();
+    positionAllocServer->Add (Vector (0.0, -30.0, 0.0)); // Position it below the AP
+    mobilityServer.SetPositionAllocator (positionAllocServer);
+    mobilityServer.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    mobilityServer.Install (serverNode);
+
     // Point-to-point link between AP and server
     PointToPointHelper pointToPoint;
     pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("1000Mbps"));
@@ -137,8 +151,10 @@ int main (int argc, char *argv[])
     // Set up the channel
     YansWifiChannelHelper channel = YansWifiChannelHelper();
     channel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
-    channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel");
-    // channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(0.0));
+    // channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel");
+    // channel.AddPropagationLoss("ns3::ConstantLossPropagationLossModel", "Loss", DoubleValue(0.0));
+    // channel.AddPropagationLoss("ns3::FixedRssLossModel", "Rss", DoubleValue(-20.0));
+    channel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(0.0));
 
     // Create a PHY helper
     YansWifiPhyHelper phy = YansWifiPhyHelper();
@@ -310,7 +326,7 @@ int main (int argc, char *argv[])
         clientOnOff.SetAttribute ("PacketSize", UintegerValue (100)); // 1KB packets
 
         ApplicationContainer clientUploadApp = clientOnOff.Install (wifiClients.Get (i));
-        clientUploadApp.Start (Seconds (1.0));
+        clientUploadApp.Start (Seconds (0.0));
         clientUploadApp.Stop (Seconds (20.0));
     }
 

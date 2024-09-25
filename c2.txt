@@ -1,0 +1,5 @@
+Client 0 completed at time 10.12 seconds
+Client 4 completed at time 10.14 seconds
+Client 1 completed at time 10.23 seconds
+Client 3 completed at time 10.24 seconds
+Client 2 completed at time 10.84 seconds

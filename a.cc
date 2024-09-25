@@ -1,3 +1,4 @@
+#include "ns3/command-line.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/mobility-module.h"
@@ -17,15 +18,21 @@ int main (int argc, char *argv[])
     LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO);
     LogComponentEnable("UdpEchoServerApplication", LOG_LEVEL_INFO);
 
+    uint32_t numClients = 5; // Specify the number of WiFi clients
 
-    uint32_t numClients = 10; // Specify the number of WiFi clients
 
+    CommandLine cmd;
+    cmd.AddValue ("numClients", "Number of WiFi clients", numClients);
+    cmd.Parse (argc, argv);
+
+
+    
     NodeContainer wifiClients;
     wifiClients.Create (numClients);
     NodeContainer wifiApNode;
     wifiApNode.Create (1);
     NodeContainer serverNode;
-    serverNode.Create (1);
+    serverNode.Create (1);  
 
     // Setup mobility for all nodes
     /*
@@ -35,7 +42,8 @@ int main (int argc, char *argv[])
     mobility.Install(wifiApNode);
     mobility.Install(serverNode);
     */
-
+    
+    /*
     // Setup mobility for the clients
     MobilityHelper mobility;
 
@@ -64,6 +72,35 @@ int main (int argc, char *argv[])
 
 
     mobility.Install(serverNode);
+
+    */
+
+    MobilityHelper mobilityClients;
+
+    Ptr<ListPositionAllocator> positionAllocClients = CreateObject<ListPositionAllocator> ();
+
+    double radius = 5.0; // Adjust the radius as desired
+    numClients = wifiClients.GetN();
+
+    for (uint32_t i = 0; i < numClients; ++i)
+    {
+        double angle = i * (2.0 * M_PI / numClients);
+        double x = radius * std::cos(angle);
+        double y = radius * std::sin(angle);
+        positionAllocClients->Add (Vector (x, y, 0.0));
+    }
+
+    mobilityClients.SetPositionAllocator (positionAllocClients);
+    mobilityClients.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    mobilityClients.Install (wifiClients);
+
+    // Setup mobility for the AP
+    MobilityHelper mobilityAp;
+    Ptr<ListPositionAllocator> positionAllocAp = CreateObject<ListPositionAllocator> ();
+    positionAllocAp->Add (Vector (0.0, 0.0, 0.0)); // AP at origin
+    mobilityAp.SetPositionAllocator (positionAllocAp);
+    mobilityAp.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    mobilityAp.Install (wifiApNode);
 
     // Point-to-point link between AP and server
     PointToPointHelper pointToPoint;
