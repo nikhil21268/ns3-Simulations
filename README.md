@@ -30,6 +30,17 @@ To visualize the network topology and packet flows, you can use NetAnim or other
 
 I've plotted the download completion times using a Python script.
 
+## Plots
+
+![b](https://github.com/nikhil21268/ns3-Simulations/blob/main/Plots/b.png)
+
+![c](https://github.com/nikhil21268/ns3-Simulations/blob/main/Plots/c.png)
+
+![d](https://github.com/nikhil21268/ns3-Simulations/blob/main/Plots/d.png)
+
+![e](https://github.com/nikhil21268/ns3-Simulations/blob/main/Plots/e.png)
+
+
 ## Contributions
 
 Contributions are welcome. Please fork this repository, make your changes, and submit a pull request.
