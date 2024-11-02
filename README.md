@@ -40,6 +40,13 @@ I've plotted the download completion times using a Python script.
 
 ![e](https://github.com/nikhil21268/ns3-Simulations/blob/main/Plots/e.png)
 
+## Screenshots
+
+![c](https://github.com/nikhil21268/ns3-Simulations/blob/main/Screenshots/Screenshot%20from%202024-09-25%2019-32-21.png)
+
+![d](https://github.com/nikhil21268/ns3-Simulations/blob/main/Screenshots/Screenshot%20from%202024-09-25%2019-33-15.png)
+
+![e](https://github.com/nikhil21268/ns3-Simulations/blob/main/Screenshots/Screenshot%20from%202024-09-25%2019-38-13.png)
 
 ## Contributions
 
