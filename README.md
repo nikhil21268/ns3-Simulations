@@ -1,4 +1,4 @@
-# Wireless Networks Simulation Using NS-3
+# Pathloss Simulation Using NS-3
 
 This repository contains a series of NS-3 simulations designed for the Wireless Networks course assignment. The simulations create a network topology with multiple WiFi clients connected to an access point (AP), which in turn is connected to a server through point-to-point (p2p) links. The objective is to analyze the network behavior under various conditions, including file transfers and the use of different WiFi management features like RTS/CTS and rate adaptation.
 
